@@ -36,7 +36,7 @@ conn.commit()
 
 # Initialize variables for pagination
 limit = 50  # Number of results per request
-total_songs_to_fetch = 1000  # Total number of songs you want to fetch
+total_songs_to_fetch = 2000  # Total number of songs you want to fetch
 offset = 0  # Starting index of results
 
 unique_song_ids = set()
@@ -44,7 +44,7 @@ unique_song_ids = set()
 while offset < total_songs_to_fetch:
     # Fetch songs from Spotify
     
-    track_results = sp.search(q='genre:"country"', type='track', limit=limit, offset=offset)
+    track_results = sp.search(q='genre:"pop"', type='track', limit=limit, offset=offset) #fetched 1000 pop, 1000 rap, 1000 country
     
     for i, item in enumerate(track_results['tracks']['items']):
         song_id = item['id']

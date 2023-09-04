@@ -22,14 +22,14 @@ conn.commit()
 #cur.execute("TRUNCATE TABLE songs;")
 #conn.commit()
 
-# Execute the SQL query to remove duplicates
+#Execute the SQL query to remove duplicates
 #cur.execute("""
 #DELETE FROM songs
 #WHERE id NOT IN (
 #   SELECT MIN(id)
 #    FROM songs
 #    GROUP BY name
-#);
+#;
 #""")
 
 # Commit the changes
