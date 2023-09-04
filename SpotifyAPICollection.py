@@ -43,7 +43,8 @@ unique_song_ids = set()
 
 while offset < total_songs_to_fetch:
     # Fetch songs from Spotify
-    track_results = sp.search(q='genre:"pop"', type='track', limit=limit, offset=offset)
+    
+    track_results = sp.search(q='genre:"country"', type='track', limit=limit, offset=offset)
     
     for i, item in enumerate(track_results['tracks']['items']):
         song_id = item['id']
