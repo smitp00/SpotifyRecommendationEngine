@@ -36,7 +36,7 @@ conn.commit()
 
 # Initialize variables for pagination
 limit = 50  # Number of results per request
-total_songs_to_fetch = 100  # Total number of songs you want to fetch
+total_songs_to_fetch = 1000  # Total number of songs you want to fetch
 offset = 0  # Starting index of results
 
 unique_song_ids = set()

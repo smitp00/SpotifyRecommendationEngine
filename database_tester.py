@@ -15,22 +15,26 @@ conn = psycopg2.connect(
 
 
 cur = conn.cursor()
-cur.execute("""
-CREATE TABLE IF NOT EXISTS songs (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    artist VARCHAR(255),
-    danceability FLOAT,
-    energy FLOAT,
-    tempo FLOAT
-);
-""")
 conn.commit()
 
 
 #un-comment out next two lines to clear table
 #cur.execute("TRUNCATE TABLE songs;")
 #conn.commit()
+
+# Execute the SQL query to remove duplicates
+#cur.execute("""
+#DELETE FROM songs
+#WHERE id NOT IN (
+#   SELECT MIN(id)
+#    FROM songs
+#    GROUP BY name
+#);
+#""")
+
+# Commit the changes
+conn.commit()
+
 
 
 # Execute SQL query to fetch first 100 songs
@@ -52,12 +56,15 @@ for row in rows:
     print("Valence:", row[8])
     print("-----------")
 
+#print total number of songs
 cur.execute("SELECT COUNT(*) FROM songs;")
-
 count = cur.fetchone()[0]
 print(f"The total number of songs in the database is: {count}")
 
-
+# Execute the SQL query to find unique song names
+cur.execute("SELECT COUNT(DISTINCT name) FROM songs;")
+count = cur.fetchone()[0]
+print(f"There are {count} unique songs by name in the database.")
 
 
 
