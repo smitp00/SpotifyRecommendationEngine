@@ -106,7 +106,7 @@ if __name__ == '__main__':
     
     recommended_songs = db_df.iloc[recommendations]
 
-    print("Based on your K-NN using Euclidean Distance, here are 10 recommended songs:")
+    print("Based K-NN using Euclidean Distance, here are 10 recommended songs:")
     print(recommended_songs[['name', 'artist','danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']])
     
     ## COSINE SIMILARITY
