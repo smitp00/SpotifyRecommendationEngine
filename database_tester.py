@@ -29,32 +29,21 @@ conn.commit()
 #   SELECT MIN(id)
 #    FROM songs
 #    GROUP BY name
-#;
+#);
 #""")
 
 # Commit the changes
 conn.commit()
 
 
+# Fetch and Print 1000 Latest Songs
+cur.execute("SELECT * FROM songs ORDER BY id DESC LIMIT 1000;")
+latest_songs = cur.fetchall()
 
-# Execute SQL query to fetch first 100 songs
-cur.execute("SELECT * FROM songs LIMIT 100;")
+# Printing the latest 1000 songs
+for song in latest_songs:
+    print(f"ID: {song[0]}, Name: {song[1]}, Artist: {song[2]}, Danceability: {song[3]}, Energy: {song[4]}, Tempo: {song[5]}, Acousticness: {song[6]}, Instrumentalness: {song[7]}, Valence: {song[8]}")
 
-# Fetch all rows (in this case, first 100)
-rows = cur.fetchall()
-
-# Print each row
-for row in rows:
-    print("ID:", row[0])
-    print("Name:", row[1])
-    print("Artist:", row[2])
-    print("Danceability:", row[3])
-    print("Energy:", row[4])
-    print("Tempo:", row[5])
-    print("Acousticness:", row[6])
-    print("Instrumentalness:", row[7])
-    print("Valence:", row[8])
-    print("-----------")
 
 #print total number of songs
 cur.execute("SELECT COUNT(*) FROM songs;")

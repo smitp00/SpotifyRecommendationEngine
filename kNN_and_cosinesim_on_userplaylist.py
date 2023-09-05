@@ -69,7 +69,7 @@ def get_audio_features_for_tracks(track_ids):
     return features_list
 
 if __name__ == '__main__':
-    playlist_input = input("Enter the Spotify Playlist URI or ID ot HTTPS (website of playlist): ")
+    playlist_input = input("Enter the Spotify Playlist URI or ID or HTTPS (website of playlist): ")
     
     if 'spotify:playlist:' in playlist_input:
         playlist_id = playlist_input.split(':')[-1]
