@@ -118,5 +118,5 @@ if __name__ == '__main__':
     top_10_indices = similarity_series.sort_values(ascending=False).head(10).index
     recommended_songs_cosine = db_df.iloc[top_10_indices]
 
-    print("\n\nBased on cosine similarity, here are 10 recommended songs:")
+    print("\n\nBased on Direct Cosine Similarity, here are 10 recommended songs:")
     print(recommended_songs_cosine[['name', 'artist','danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']])

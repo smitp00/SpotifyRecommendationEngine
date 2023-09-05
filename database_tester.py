@@ -23,14 +23,14 @@ conn.commit()
 #conn.commit()
 
 #Execute the SQL query to remove duplicates
-#cur.execute("""
-#DELETE FROM songs
-#WHERE id NOT IN (
-#   SELECT MIN(id)
-#    FROM songs
-#    GROUP BY name
-#);
-#""")
+cur.execute("""
+DELETE FROM songs
+WHERE id NOT IN (
+   SELECT MIN(id)
+    FROM songs
+    GROUP BY name
+);
+""")
 
 # Commit the changes
 conn.commit()

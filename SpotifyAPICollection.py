@@ -36,15 +36,15 @@ conn.commit()
 
 # Initialize variables for pagination
 limit = 50  # Number of results per request
-total_songs_to_fetch = 1000  # Total number of songs you want to fetch
+total_songs_to_fetch = 1000  # Total number of songs fetched, sweet spot seems to be 1000 without triggering the Spotify API rate limit
 offset = 0  # Starting index of results
 
 unique_song_ids = set()
 
 while offset < total_songs_to_fetch:
     # Fetch songs from Spotify
-    # Fetched 1000 of each genre for diversity (gets recent and popular): pop, rap, country, hip-hop, rock, r&b, reggae, electronic, classical, summer, workout 
-    track_results = sp.search(q='genre:"sad"', type='track', limit=limit, offset=offset) 
+    # Fetched 1000 of each genre for diversity (gets recent and popular): pop, rap, country, hip-hop, rock, r&b, reggae, electronic, classical, summer, workout, Latin, edm
+    track_results = sp.search(q='genre:"pop"', type='track', limit=limit, offset=offset) 
     
     for i, item in enumerate(track_results['tracks']['items']):
         song_id = item['id']
