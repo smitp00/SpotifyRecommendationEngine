@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Songs</title>
+    <style>
+        /* Spotify-inspired Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Spotify Black */
+            color:#B3B3B3; /* Spotify Grey */
+        }
+
+        h2, h3 {
+            color: #1DB954; /* Spotify Green */
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        h4 {
+            color: #ffffff; /* Spotify Green */
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #333;
+        }
+
+        th {
+            background-color: #333;
+            color: #B3B3B3;
+        }
+
+        tr:hover {
+            background-color: #333;
+        }
+
+        td, th {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<h2>Playlist Name: {{ playlist_name }}</h2> <!-- Displaying the playlist name -->
+<h4>Total Songs in your Playlist: {{ total_songs }}</h4> <!-- Displaying the number of songs -->
+
+<h3>Top 10 Recommended Songs Extracted Using K-Nearest Neighbors using Euclidean Distance</h3>
+<h4>(Relevant if the raw magnitudes of the audio features are important to your recommendations)</h4>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Artist</th>
+            <th>Danceability</th>
+            <th>Energy</th>
+            <th>Tempo</th>
+            <th>Acousticness</th>
+            <th>Instrumentalness</th>
+            <th>Valence</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for song in songs_knn.iterrows() %}
+        <tr>
+            <td>{{ song[1]['name'] }}</td>
+            <td>{{ song[1]['artist'] }}</td>
+            <td>{{ song[1]['danceability'] }}</td>
+            <td>{{ song[1]['energy'] }}</td>
+            <td>{{ song[1]['tempo'] }}</td>
+            <td>{{ song[1]['acousticness'] }}</td>
+            <td>{{ song[1]['instrumentalness'] }}</td>
+            <td>{{ song[1]['valence'] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h3>Top 10 Recommended Songs Extracted Using Direct Cosine Similarity</h3>
+<h4>(Relevant if you care more about the "flavor" of the music, represented by the ratio of different features to each other)</h4>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Artist</th>
+            <th>Danceability</th>
+            <th>Energy</th>
+            <th>Tempo</th>
+            <th>Acousticness</th>
+            <th>Instrumentalness</th>
+            <th>Valence</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for song in songs_cosine.iterrows() %}
+        <tr>
+            <td>{{ song[1]['name'] }}</td>
+            <td>{{ song[1]['artist'] }}</td>
+            <td>{{ song[1]['danceability'] }}</td>
+            <td>{{ song[1]['energy'] }}</td>
+            <td>{{ song[1]['tempo'] }}</td>
+            <td>{{ song[1]['acousticness'] }}</td>
+            <td>{{ song[1]['instrumentalness'] }}</td>
+            <td>{{ song[1]['valence'] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

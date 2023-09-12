@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Playlist Recommendation Engine</title>
+    <style>
+            /* General Styles */
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #181818;
+        color: #FFFFFF;
+        padding: 40px;
+    }
+
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 20px;
+        word-wrap: break-word;
+    }
+
+    /* Form Styles */
+    form {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        outline: none;
+    }
+
+    input {
+        background-color: #282828;
+        color: #B3B3B3;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    input::placeholder {
+        color: #B3B3B3;
+    }
+
+    button {
+        background-color: #1DB954;
+        color: #FFFFFF;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #189743;
+    }
+
+    /* Error Message Styles */
+    .error {
+        color: #E0245E; /* Spotify's Error Red Color */
+        text-align: center;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body>
+    <h1>Enter your Spotify Playlist ID or Link</h1>
+    <h2>Unleash Machine Learning Magic on Your Playlist to Recommend Songs from our 100,000+ Song Database!</h2>
+    
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form action="/" method="post" onsubmit="return processForm();">
+        <input type="text" name="playlist_id" id="playlistInput" placeholder="Spotify Playlist ID or Link" required>
+        <button type="submit">Get Song Recommendations</button>
+    </form>
+    <div class="error" id="errorMsg"></div>
+
+    <script>
+        function processForm() {
+            let input = document.getElementById('playlistInput').value;
+
+            // Check if the input is a Spotify URL
+            const regex = /https:\/\/open\.spotify\.com\/playlist\/(\w+)/;
+            const match = input.match(regex);
+            
+            if (match && match[1]) {
+                document.getElementById('playlistInput').value = match[1];  // Set input to only the ID
+                document.getElementById('errorMsg').innerText = '';  // Clear error message
+                return true;
+            } else if (input.length !== 22) {  // Length of a Spotify ID is 22 characters
+                document.getElementById('errorMsg').innerText = 'Please provide a valid Spotify Playlist ID or Link.';
+                return false;  // Prevent form submission
+            }
+
+            return true;  // Continue with form submission if ID is valid
+        }
+    </script>
+</body>
+</html>

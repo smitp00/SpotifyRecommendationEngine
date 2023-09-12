@@ -1,54 +1,42 @@
 import psycopg2
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from sklearn.metrics.pairwise import cosine_similarity
+import config  # Assuming you've created a config.py to store credentials, like before
 
-# Initialize Spotify API
-sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="c00c74aff95d47ada8bb2b8ee9ed7313", client_secret="d7de766b64964afd8ff56d80c47e67b8"))
-
-# Connect to PostgreSQL database
-conn = psycopg2.connect(
-    host="localhost",
-    database="spotify_database",
-    user="smitpatel",
-    password="Spate469!-",
-    port="5432"
-)
-
-# Create a new cursor
-cur = conn.cursor()
-
-# Execute SQL query and fetch data into a Pandas DataFrame
-cur.execute("SELECT * FROM songs")
-db_df = pd.DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
-
-print(db_df.columns)
-
-# Don't forget to close the cursor and connection when you're done
-cur.close()
-conn.close()
-
-# Initialize the MinMaxScaler
-scaler = MinMaxScaler() #normalizing
+sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=config.SPOTIFY_CLIENT_ID, client_secret=config.SPOTIFY_CLIENT_SECRET))
 
 
-# Prepare for k-NN (only keeping numerical features for the model)
-knn_df = db_df[['danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']]
-knn_df_scaled = scaler.fit_transform(knn_df) #normalizing
+def connect_to_database():
+    conn = psycopg2.connect(
+        host=config.DB_HOST,
+        database=config.DB_NAME,
+        user=config.DB_USER,
+        password=config.DB_PASSWORD,
+        port=config.DB_PORT
+    )
+    return conn, conn.cursor()
 
-# Train k-NN model on scaled data
-knn = NearestNeighbors(n_neighbors=10)
-knn.fit(knn_df_scaled)
+
+def fetch_all_songs(cur):
+    cur.execute("SELECT * FROM songs")
+    return pd.DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
 
 
-def get_playlist_tracks(playlist_id):
+def get_playlist_data(playlist_id):
     songs = []
     offset = 0
     limit = 100
+    
+    # First call to get the metadata of the playlist
+    playlist_metadata = sp.playlist(playlist_id)
+    
+    # Extract the playlist name and total number of songs
+    playlist_name = playlist_metadata['name']
+    total_songs = playlist_metadata['tracks']['total']
     
     while True:
         results = sp.playlist_tracks(playlist_id, offset=offset, limit=limit)
@@ -57,7 +45,9 @@ def get_playlist_tracks(playlist_id):
         songs.extend(results['items'])
         offset += limit
     
-    return songs
+    return songs, playlist_name, total_songs
+
+
 
 def get_audio_features_for_tracks(track_ids):
     features_list = []
@@ -68,55 +58,62 @@ def get_audio_features_for_tracks(track_ids):
     
     return features_list
 
-if __name__ == '__main__':
-    playlist_input = input("Enter the Spotify Playlist URI or ID or HTTPS (website of playlist): ")
-    
-    if 'spotify:playlist:' in playlist_input:
-        playlist_id = playlist_input.split(':')[-1]
-    else:
-        playlist_id = playlist_input
 
-    playlist_tracks = get_playlist_tracks(playlist_id)
-    track_ids = [track['track']['id'] for track in playlist_tracks]
-    
-    audio_features = get_audio_features_for_tracks(track_ids)
-
-    # Convert audio features to a Pandas DataFrame
-    playlist_df = pd.DataFrame(audio_features)
-    
-    # Prepare DataFrame for k-NN model
-    playlist_knn_df = playlist_df[['danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']]
-    
-    # Initialize scaler
+def recommend_knn_euclidean(df, knn_df, playlist_knn_df):
     scaler = StandardScaler()
-    knn_df_scaled = scaler.fit_transform(knn_df)  # Assuming knn_df is your training data
-    
-    # Scale the playlist features
-    playlist_knn_df_scaled = scaler.transform(playlist_knn_df)
-    
-    # Compute the centroid of the playlist for cosine similarity
+    knn_df_scaled = scaler.fit_transform(knn_df)
     centroid = scaler.transform([playlist_knn_df.mean(axis=0)])
     
-    # Use k-NN model to find the 10 most similar songs in the database to the "centroid" song
     knn = NearestNeighbors(n_neighbors=10)
     knn.fit(knn_df_scaled)
     distances, indices = knn.kneighbors(centroid)
     
-    recommendations = indices[0]
-    
-    recommended_songs = db_df.iloc[recommendations]
+    return df.iloc[indices[0]]
 
-    print("Based K-NN using Euclidean Distance, here are 10 recommended songs:")
-    print(recommended_songs[['name', 'artist','danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']])
+
+def recommend_cosine_similarity(df, knn_df, playlist_knn_df):
+    scaler = StandardScaler()
+    knn_df_scaled = scaler.fit_transform(knn_df)
+    centroid = scaler.transform([playlist_knn_df.mean(axis=0)])
     
-    ## COSINE SIMILARITY
-    # Compute cosine similarity between the centroid and all songs in the database
     similarity_matrix = cosine_similarity(centroid, knn_df_scaled)
     similarity_series = pd.Series(similarity_matrix[0])
-    
-    # Get top 10 most similar songs
     top_10_indices = similarity_series.sort_values(ascending=False).head(10).index
-    recommended_songs_cosine = db_df.iloc[top_10_indices]
+    
+    return df.iloc[top_10_indices]
 
+
+def get_recommendations(playlist_input):
+    conn, cur = connect_to_database()
+    db_df = fetch_all_songs(cur)
+    cur.close()
+    conn.close()
+    
+    playlist_id = playlist_input.split(':')[-1] if 'spotify:playlist:' in playlist_input else playlist_input
+    playlist_tracks, playlist_name, total_songs = get_playlist_data(playlist_id)
+    
+    track_ids = [track['track']['id'] for track in playlist_tracks]
+    audio_features = get_audio_features_for_tracks(track_ids)
+    playlist_df = pd.DataFrame(audio_features)
+    playlist_knn_df = playlist_df[['danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']]
+    knn_df = db_df[['danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']]
+    
+    recommended_songs_knn = recommend_knn_euclidean(db_df, knn_df, playlist_knn_df)
+    
+    recommended_songs_cosine = recommend_cosine_similarity(db_df, knn_df, playlist_knn_df)
+    
+    return recommended_songs_knn, recommended_songs_cosine, playlist_name, total_songs
+
+
+
+if __name__ == '__main__':
+    playlist_input = input("Enter the Spotify Playlist URI or ID or HTTPS (website of playlist): ")
+    recommended_songs_knn, recommended_songs_cosine, playlist_name, total_songs = get_recommendations(playlist_input)
+
+    print(f"Playlist: {playlist_name}")
+    print(f"Total songs in the playlist: {total_songs}")
+    print("\nBased on K-NN using Euclidean Distance, here are 10 recommended songs:")
+    print(recommended_songs_knn[['name', 'artist','danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']])
+    
     print("\n\nBased on Direct Cosine Similarity, here are 10 recommended songs:")
     print(recommended_songs_cosine[['name', 'artist','danceability', 'energy', 'tempo', 'acousticness', 'instrumentalness', 'valence']])
