@@ -13,13 +13,15 @@ def connect_to_database():
     DATABASE_URL = os.environ.get('DATABASE_URL')  # Fetch the DATABASE_URL from the environment
 
     if not DATABASE_URL:  # If DATABASE_URL is not set (e.g., running locally), fallback to your config
-        return psycopg2.connect(
+        conn = psycopg2.connect(
             host=config.DB_HOST,
             database=config.DB_NAME,
             user=config.DB_USER,
             password=config.DB_PASSWORD,
             port=config.DB_PORT
-        ), conn.cursor()
+        )
+        
+        return conn, conn.cursor()
 
     # Parse the DATABASE_URL which contains everything
     result = urlparse(DATABASE_URL)
@@ -39,17 +41,17 @@ def connect_to_database():
 
     return conn, conn.cursor()
 
-
+#modular function to close PostGreSQL database
 def close_database(conn, cur):
     cur.close()
     conn.close()
 
-
+#modular function to clear all songs from PostGreSQL
 def clear_songs_table(cur, conn):
     cur.execute("TRUNCATE TABLE songs;")
     conn.commit()
 
-
+#modular function to remove duplicates by song name
 def remove_duplicates(cur, conn):
     cur.execute("""
     DELETE FROM songs
@@ -61,17 +63,17 @@ def remove_duplicates(cur, conn):
     """)
     conn.commit()
 
-
+#modular function to extract 1000 latest songs added to the PostGreSQL database
 def fetch_latest_songs(cur, limit=1000):
     cur.execute(f"SELECT * FROM songs ORDER BY id DESC LIMIT {limit};")
     return cur.fetchall()
 
-
+#modular function to get total number of songs in PostGreSQL database
 def get_total_song_count(cur):
     cur.execute("SELECT COUNT(*) FROM songs;")
     return cur.fetchone()[0]
 
-
+#modular function to get total number of unique songs in PostGreSQL database
 def get_unique_song_count_by_name(cur):
     cur.execute("SELECT COUNT(DISTINCT name) FROM songs;")
     return cur.fetchone()[0]

@@ -1,11 +1,13 @@
+#import processing libraries (pandas, sklearn)
 import psycopg2
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.metrics.pairwise import cosine_similarity
+import config  # config.py to store credentials
+#spotify API libraries
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from sklearn.metrics.pairwise import cosine_similarity
-import config  # Assuming you've created a config.py to store credentials, like before
 
 #for Heroku database and parsing the DATABASE_URL
 import os
@@ -13,18 +15,20 @@ from urllib.parse import urlparse
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=config.SPOTIFY_CLIENT_ID, client_secret=config.SPOTIFY_CLIENT_SECRET))
 
-
+#connects to either Heroku if deployed (DATABASE_URL) or local POSGRESQL database using config file
 def connect_to_database():
-    DATABASE_URL = os.environ.get('DATABASE_URL')  # Fetch the DATABASE_URL from the environment
+    DATABASE_URL = os.environ.get('DATABASE_URL')  # Fetch the DATABASE_URL from the environment if it is there
 
-    if not DATABASE_URL:  # If DATABASE_URL is not set (e.g., running locally), fallback to your config
-        return psycopg2.connect(
+    if not DATABASE_URL:  # If DATABASE_URL is not set (e.g., running locally), fallback to config
+        conn = psycopg2.connect(
             host=config.DB_HOST,
             database=config.DB_NAME,
             user=config.DB_USER,
             password=config.DB_PASSWORD,
             port=config.DB_PORT
-        ), conn.cursor()
+        )
+
+        return conn, conn.cursor()
 
     # Parse the DATABASE_URL
     result = urlparse(DATABASE_URL)
@@ -44,12 +48,12 @@ def connect_to_database():
 
     return conn, conn.cursor()
 
-
+#Fetches all songs from PostGreSQL database
 def fetch_all_songs(cur):
     cur.execute("SELECT * FROM songs")
     return pd.DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
 
-
+#Given playlist ID, return songs from the playlist with their features, playlist name, and number of songs in user-inputted playlist
 def get_playlist_data(playlist_id):
     songs = []
     offset = 0
@@ -72,7 +76,7 @@ def get_playlist_data(playlist_id):
     return songs, playlist_name, total_songs
 
 
-
+#returns list of features according to track id on spotify
 def get_audio_features_for_tracks(track_ids):
     features_list = []
     for i in range(0, len(track_ids), 100):
@@ -82,7 +86,7 @@ def get_audio_features_for_tracks(track_ids):
     
     return features_list
 
-
+#normalizes playlist data and performs knn algorithm with the playlist centroid as the query and the PostGreSQL 
 def recommend_knn_euclidean(df, knn_df, playlist_knn_df):
     scaler = StandardScaler()
     knn_df_scaled = scaler.fit_transform(knn_df)
@@ -94,7 +98,7 @@ def recommend_knn_euclidean(df, knn_df, playlist_knn_df):
     
     return df.iloc[indices[0]]
 
-
+#normalizes playlist data and performs cosine similarity on centroid against every item in playlist and returns top 10 most similar tracks
 def recommend_cosine_similarity(df, knn_df, playlist_knn_df):
     scaler = StandardScaler()
     knn_df_scaled = scaler.fit_transform(knn_df)
@@ -129,7 +133,7 @@ def get_recommendations(playlist_input):
     return recommended_songs_knn, recommended_songs_cosine, playlist_name, total_songs
 
 
-
+#runs if python file runs locally by itself
 if __name__ == '__main__':
     playlist_input = input("Enter the Spotify Playlist URI or ID or HTTPS (website of playlist): ")
     recommended_songs_knn, recommended_songs_cosine, playlist_name, total_songs = get_recommendations(playlist_input)

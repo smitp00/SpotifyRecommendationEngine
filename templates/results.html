@@ -78,7 +78,7 @@
         </tr>
     </thead>
     <tbody>
-    {% for song in songs_knn.iterrows() %}
+    {% for song in songs_knn.iterrows() %} <!-- Displaying the songs -->
         <tr>
             <td class="bold-text"><strong>{{ song[1]['name'] }}</strong></td>
             <td class="bold-text"><strong>{{ song[1]['artist'] }}</strong></td>
@@ -93,7 +93,7 @@
     </tbody>
 </table>
 
-<h3>Top 10 Recommended Songs Extracted Using Direct Cosine Similarity</h3>
+<h3>Top 10 Recommended Songs Extracted Using Direct Cosine Similarity</h3> 
 <h4>(Relevant if you care more about the "flavor" of the music, represented by the ratio of different features to each other)</h4>
 <table>
     <thead>
@@ -109,7 +109,7 @@
         </tr>
     </thead>
     <tbody>
-    {% for song in songs_cosine.iterrows() %}
+    {% for song in songs_cosine.iterrows() %} <!-- Displaying the songs -->
         <tr>
             <td class="bold-text"><strong>{{ song[1]['name'] }}</strong></td>
             <td class="bold-text"><strong>{{ song[1]['artist'] }}</strong></td>
