@@ -101,7 +101,7 @@
                 document.getElementById('errorMsg').innerText = '';  // Clear error message
                 return true;
             } else if (input.length !== 22) {  // Length of a Spotify ID is 22 characters
-                document.getElementById('errorMsg').innerText = 'Please provide a valid Spotify Playlist ID or Link.';
+                document.getElementById('errorMsg').innerText = 'Please provide a valid Spotify Playlist ID or Link (spotify.link URLs will not work\nExample formats: https://open.spotify.com/playlist/37i9dQZF1DX0b1hHYQtJjp, 37i9dQZF1DX0b1hHYQtJjp, Playlist URI)';
                 return false;  // Prevent form submission
             }
 
