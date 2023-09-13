@@ -21,7 +21,7 @@ def connect_to_database():
             port=config.DB_PORT
         ), conn.cursor()
 
-    # Parse the DATABASE_URL
+    # Parse the DATABASE_URL which contains everything
     result = urlparse(DATABASE_URL)
     username = result.username
     password = result.password
