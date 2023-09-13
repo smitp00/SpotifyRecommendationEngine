@@ -26,6 +26,12 @@
             margin-top: 20px;
         }
 
+        .bold-text {
+            
+            font-weight: bold;
+        
+        }
+        
         table {
             width: 80%;
             margin: 20px auto;
@@ -74,8 +80,8 @@
     <tbody>
     {% for song in songs_knn.iterrows() %}
         <tr>
-            <td><strong>{{ song[1]['name'] }}</strong></td>
-            <td><strong>{{ song[1]['artist'] }}</strong></td>
+            <td class="bold-text"><strong>{{ song[1]['name'] }}</strong></td>
+            <td class="bold-text"><strong>{{ song[1]['artist'] }}</strong></td>
             <td>{{ song[1]['danceability'] }}</td>
             <td>{{ song[1]['energy'] }}</td>
             <td>{{ song[1]['tempo'] }}</td>
@@ -105,8 +111,8 @@
     <tbody>
     {% for song in songs_cosine.iterrows() %}
         <tr>
-            <td><strong>{{ song[1]['name'] }}</strong></td>
-            <td><strong>{{ song[1]['artist'] }}</strong></td>
+            <td class="bold-text"><strong>{{ song[1]['name'] }}</strong></td>
+            <td class="bold-text"><strong>{{ song[1]['artist'] }}</strong></td>
             <td>{{ song[1]['danceability'] }}</td>
             <td>{{ song[1]['energy'] }}</td>
             <td>{{ song[1]['tempo'] }}</td>
