@@ -74,8 +74,8 @@
     <tbody>
     {% for song in songs_knn.iterrows() %}
         <tr>
-            <td>{{ song[1]['name'] }}</td>
-            <td>{{ song[1]['artist'] }}</td>
+            <td><strong>{{ song[1]['name'] }}</strong></td>
+            <td><strong>{{ song[1]['artist'] }}</strong></td>
             <td>{{ song[1]['danceability'] }}</td>
             <td>{{ song[1]['energy'] }}</td>
             <td>{{ song[1]['tempo'] }}</td>
@@ -105,8 +105,8 @@
     <tbody>
     {% for song in songs_cosine.iterrows() %}
         <tr>
-            <td>{{ song[1]['name'] }}</td>
-            <td>{{ song[1]['artist'] }}</td>
+            <td><strong>{{ song[1]['name'] }}</strong></td>
+            <td><strong>{{ song[1]['artist'] }}</strong></td>
             <td>{{ song[1]['danceability'] }}</td>
             <td>{{ song[1]['energy'] }}</td>
             <td>{{ song[1]['tempo'] }}</td>
