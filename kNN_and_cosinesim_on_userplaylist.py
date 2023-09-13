@@ -7,17 +7,41 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from sklearn.metrics.pairwise import cosine_similarity
 import config  # Assuming you've created a config.py to store credentials, like before
 
+#for Heroku database and parsing the DATABASE_URL
+import os
+from urllib.parse import urlparse
+
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=config.SPOTIFY_CLIENT_ID, client_secret=config.SPOTIFY_CLIENT_SECRET))
 
 
 def connect_to_database():
+    DATABASE_URL = os.environ.get('DATABASE_URL')  # Fetch the DATABASE_URL from the environment
+
+    if not DATABASE_URL:  # If DATABASE_URL is not set (e.g., running locally), fallback to your config
+        return psycopg2.connect(
+            host=config.DB_HOST,
+            database=config.DB_NAME,
+            user=config.DB_USER,
+            password=config.DB_PASSWORD,
+            port=config.DB_PORT
+        ), conn.cursor()
+
+    # Parse the DATABASE_URL
+    result = urlparse(DATABASE_URL)
+    username = result.username
+    password = result.password
+    database = result.path[1:]
+    hostname = result.hostname
+    port = result.port
+
     conn = psycopg2.connect(
-        host=config.DB_HOST,
-        database=config.DB_NAME,
-        user=config.DB_USER,
-        password=config.DB_PASSWORD,
-        port=config.DB_PORT
+        dbname=database,
+        user=username,
+        password=password,
+        host=hostname,
+        port=port
     )
+
     return conn, conn.cursor()
 
 

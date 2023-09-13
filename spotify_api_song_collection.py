@@ -2,17 +2,39 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import psycopg2
 import config  # Import configuration 
+import os
+from urllib.parse import urlparse
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=config.SPOTIFY_CLIENT_ID, client_secret=config.SPOTIFY_CLIENT_SECRET))
 
 def connect_to_database():
+    DATABASE_URL = os.environ.get('DATABASE_URL')  # Fetch the DATABASE_URL from the environment
+
+    if not DATABASE_URL:  # If DATABASE_URL is not set (e.g., running locally), fallback to your config
+        return psycopg2.connect(
+            host=config.DB_HOST,
+            database=config.DB_NAME,
+            user=config.DB_USER,
+            password=config.DB_PASSWORD,
+            port=config.DB_PORT
+        )
+
+    # Parse the DATABASE_URL
+    result = urlparse(DATABASE_URL)
+    username = result.username
+    password = result.password
+    database = result.path[1:]
+    hostname = result.hostname
+    port = result.port
+
     conn = psycopg2.connect(
-        host=config.DB_HOST,
-        database=config.DB_NAME,
-        user=config.DB_USER,
-        password=config.DB_PASSWORD,
-        port=config.DB_PORT
+        dbname=database,
+        user=username,
+        password=password,
+        host=hostname,
+        port=port
     )
+
     return conn
 
 def create_song_table(conn):
