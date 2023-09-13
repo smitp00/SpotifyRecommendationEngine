@@ -76,7 +76,7 @@
 </head>
 <body>
     <h1>Enter your Spotify Playlist ID or Link</h1>
-    <h2>Unleash Machine Learning Magic on Your Playlist to Recommend Songs from our 100,000+ Song Database!</h2>
+    <h2>Unleash Machine Learning Algorithms on Your Playlist to Recommend Songs from our 100,000+ Song Database!</h2>
     
     {% if error %}
     <div class="error">{{ error }}</div>
@@ -101,7 +101,7 @@
                 document.getElementById('errorMsg').innerText = '';  // Clear error message
                 return true;
             } else if (input.length !== 22) {  // Length of a Spotify ID is 22 characters
-                document.getElementById('errorMsg').innerText = 'Please provide a valid Spotify Playlist ID or Link (spotify.link URLs will not work\nExample formats: https://open.spotify.com/playlist/37i9dQZF1DX0b1hHYQtJjp, 37i9dQZF1DX0b1hHYQtJjp, Playlist URI)';
+                document.getElementById('errorMsg').innerText = 'Please provide a valid Spotify Playlist ID or Link (spotify.link URLs extracted from app not allowed)\nExample formats: https://open.spotify.com/playlist/37i9dQZF1DX0b1hHYQtJjp, 37i9dQZF1DX0b1hHYQtJjp (Playlist ID), Playlist URI';
                 return false;  // Prevent form submission
             }
 
