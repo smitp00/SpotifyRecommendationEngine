@@ -4,6 +4,7 @@ from spotipy.exceptions import SpotifyException
 
 app = Flask(__name__)
 
+#app.py route activation 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -27,6 +28,7 @@ def index():
         print("\nCosine Similarity Recommendations:\n", recommended_songs_cosine)
         print("\nPlaylist name:", playlist_name, " Total Songs:", total_songs)
 
+        #returns results.html only if no errors with playlist ID
         return render_template('results.html', songs_knn=recommended_songs_knn, songs_cosine=recommended_songs_cosine, playlist_name=playlist_name, total_songs=total_songs)
     return render_template('index.html')
 
